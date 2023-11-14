@@ -105,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
                 let args = getArguments(text);
 
                 if (label !== "") {
-                    edits.push(vscode.TextEdit.insert(line.range.start, `${label}\n`));
+                    edits.push(vscode.TextEdit.insert(line.range.start, `${label}${instruction !== "" ? "\n" : comment !== "" ? " " : ""}`));
                 }
 
                 let newText = options.insertSpaces ? "".padEnd(options.tabSize, ' ') : "\t";
