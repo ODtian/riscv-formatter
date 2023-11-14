@@ -22,10 +22,22 @@
                     "RISC-V"
                 ],
                 "extensions": [
-                    "riscv"
+                    "riscv",
+                    "asm",
+                    "s"
                 ]
             }
-        ]
+        ],
+        "configuration": {
+            "title": "RISCV Formatter",
+            "properties": {
+                "riscv-formatter.labels.separateLine": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Labels are placed on their own line separate from instructions."
+                }
+            }
+        }
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install && tsc",

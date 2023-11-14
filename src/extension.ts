@@ -2,33 +2,33 @@
 
 import * as vscode from 'vscode';
 
-function getLabel(text: String): String {
+function getLabel(text: string): string {
     let comment = text.indexOf("#");
     let label = text.indexOf(":");
     if (comment !== -1 && label > comment) label = -1;
     return label !== -1 ? text.substring(0, label + 1).trim() : "";
 }
 
-function getCommand(text: String): String {
+function getCommand(text: string): string {
     let comment = text.indexOf("#");
     let label = text.indexOf(":");
     if (comment !== -1 && label > comment) label = -1;
     return text.substring(label !== -1 ? label + 1 : 0, comment !== -1 ? comment : undefined).trim();
 }
 
-function getInstruction(text: String): String {
+function getInstruction(text: string): string {
     let command = getCommand(text);
     return command.split(' ')[0].trim();
 }
 
-function getArguments(text: String): String {
+function getArguments(text: string): string {
     let command = getCommand(text);
     let args = command.split(' ')
     args.shift();
     return args.join(' ').trim();
 }
 
-function getComment(text: String): String {
+function getComment(text: string): string {
     let comment = text.indexOf("#");
     return comment !== -1 ? text.substring(comment).trim() : "";
 }
@@ -37,6 +37,8 @@ export function activate(context: vscode.ExtensionContext) {
     const output = vscode.window.createOutputChannel("RISC-V Formatter");
     vscode.languages.registerDocumentFormattingEditProvider('riscv', {
         provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions): vscode.TextEdit[] {
+            const labelsOnSeparateLine: boolean = vscode.workspace.getConfiguration('riscv-formatter.labels').get("separateLine");
+            const indentCharacters = options.insertSpaces ? options.tabSize : 1;
             // declare counters
             let maxLabelLength = 0;
             let maxInstructionLength = 0;
@@ -104,20 +106,63 @@ export function activate(context: vscode.ExtensionContext) {
                 let instruction = getInstruction(text);
                 let args = getArguments(text);
 
-                if (label !== "") {
-                    edits.push(vscode.TextEdit.insert(line.range.start, `${label}${instruction !== "" ? "\n" : comment !== "" ? " " : ""}`));
+                let newText = "";
+                if (labelsOnSeparateLine) {
+                    if (options.insertSpaces) {
+                        newText = "".padEnd(options.tabSize, ' ');
+                    } else {
+                        newText = "\t";
+                    }
                 }
 
-                let newText = options.insertSpaces ? "".padEnd(options.tabSize, ' ') : "\t";
+                if (label !== "") {
+                    if (labelsOnSeparateLine) {
+                        let labelLine = label;
+                        if (instruction !== "") {
+                            labelLine += "\n";
+                        } else if (comment !== "") {
+                            labelLine += " ";
+                        }
+                        edits.push(vscode.TextEdit.insert(line.range.start, labelLine));
+                    } else {
+                        newText += label;
+                        newText = newText.padEnd(maxLabelLength + 1, ' ');
+                    }
+                } else if (!labelsOnSeparateLine) {
+                    if (l > 0) {
+                        let prevLine = document.lineAt(l - 1);
+                        let prevText = prevLine.text;
+                        // ensure : is followed by a space
+                        prevText = prevText.replace(/:/g, ': ');
+                        // replace tabs with spaces
+                        prevText = prevText.replace(/\t/g, ' ');
+                        // remove excess spaces from the line
+                        prevText = prevText.replace(/ +(?= )/g, '').trim();
+
+                        let prevLabel = getLabel(prevText);
+                        let prevComment = getComment(prevText);
+                        let prevInstruction = getInstruction(prevText);
+                        let prevArgs = getArguments(prevText);
+
+                        if (prevLabel !== "" && prevComment === "" && prevInstruction === "" && prevArgs === "") {
+                            newText += prevLabel;
+                            edits.push(vscode.TextEdit.delete(prevLine.rangeIncludingLineBreak));
+                        }
+                    }
+                    newText = newText.padEnd(maxLabelLength + 1, ' ');
+                }
+
                 if (instruction !== "") {
                     newText += instruction;
                 }
+
                 if (args !== "") {
-                    newText = newText.padEnd(maxInstructionLength + (options.insertSpaces ? options.tabSize : 1) + 1, ' ');
+                    newText = newText.padEnd(maxInstructionLength + indentCharacters + (!labelsOnSeparateLine ? 2 + maxLabelLength : 1), ' ');
                     newText += args;
                 }
+
                 if (comment !== "") {
-                    newText = newText.padEnd(maxInstructionLength + maxArgumentsLength + (options.insertSpaces ? options.tabSize : 1) + 2, ' ');
+                    newText = newText.padEnd(maxInstructionLength + maxArgumentsLength + indentCharacters + (!labelsOnSeparateLine ? 3 + maxLabelLength : 2), ' ');
                     newText += comment;
                 }
 
