@@ -1,0 +1,40 @@
+{
+    "name": "riscv-formatter",
+    "displayName": "riscv-formatter",
+    "description": "",
+    "version": "0.0.1",
+    "publisher": "penguinsnail",
+    "engines": {
+        "vscode": "^1.6.0"
+    },
+    "categories": [
+        "Formatters"
+    ],
+    "activationEvents": [
+        "onLanguage:riscv"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "languages": [
+            {
+                "id": "riscv",
+                "aliases": [
+                    "RISC-V"
+                ],
+                "extensions": [
+                    "riscv"
+                ]
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install && tsc",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {
+        "@types/node": "^20.9.0",
+        "typescript": "^5.2.2",
+        "vscode": "^1.1.37"
+    }
+}
