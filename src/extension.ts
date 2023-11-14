@@ -104,24 +104,24 @@ export function activate(context: vscode.ExtensionContext) {
                 let instruction = getInstruction(text);
                 let args = getArguments(text);
 
-                let newText = "";
                 if (label !== "") {
-                    newText += label;
+                    edits.push(vscode.TextEdit.insert(line.range.start, `${label}\n`));
                 }
+
+                let newText = options.insertSpaces ? "".padEnd(options.tabSize, ' ') : "\t";
                 if (instruction !== "") {
-                    newText = newText.padEnd(maxLabelLength + 1, ' ');
                     newText += instruction;
                 }
                 if (args !== "") {
-                    newText = newText.padEnd(maxLabelLength + maxInstructionLength + 2, ' ');
+                    newText = newText.padEnd(maxInstructionLength + (options.insertSpaces ? options.tabSize : 1) + 1, ' ');
                     newText += args;
                 }
                 if (comment !== "") {
-                    newText = newText.padEnd(maxLabelLength + maxInstructionLength + maxArgumentsLength + 3, ' ');
+                    newText = newText.padEnd(maxInstructionLength + maxArgumentsLength + (options.insertSpaces ? options.tabSize : 1) + 2, ' ');
                     newText += comment;
                 }
 
-                if (label === "" && instruction === "" && args === "") newText = newText.trim();
+                if (instruction === "" && args === "") newText = newText.trim();
 
                 edits.push(vscode.TextEdit.replace(line.range, newText));
             }
