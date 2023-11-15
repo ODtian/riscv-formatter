@@ -1,8 +1,9 @@
 {
     "name": "riscv-formatter",
     "displayName": "riscv-formatter",
-    "description": "",
-    "version": "0.0.1",
+    "description": "A VSCode formatter extension for RISC-V Assembly",
+    "repository": "https://github.com/PenguinSnail/riscv-formatter",
+    "version": "1.0.0",
     "publisher": "penguinsnail",
     "engines": {
         "vscode": "^1.6.0"

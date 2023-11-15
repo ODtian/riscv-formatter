@@ -1,3 +1,3 @@
 # RISC-V Formatter
 
-This is a simple formatter for RISC-V assembly code.
+A simple VSCode formatter extension for RISC-V Assembly
