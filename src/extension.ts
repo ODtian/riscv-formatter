@@ -5,7 +5,8 @@ import * as vscode from 'vscode';
 function getLabel(text: string): string {
     let comment = text.indexOf("#");
     let label = text.indexOf(":");
-    if (comment !== -1 && label > comment) label = -1;
+    let string = Math.min(text.indexOf(`"`), text.indexOf(`"`));
+    if (comment !== -1 && label > comment && label > string) label = -1;
     return label !== -1 ? text.substring(0, label + 1).trim() : "";
 }
 
